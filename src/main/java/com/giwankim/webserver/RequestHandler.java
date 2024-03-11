@@ -3,11 +3,11 @@ package com.giwankim.webserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Objects;
 
 public class RequestHandler extends Thread {
   private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
@@ -15,7 +15,7 @@ public class RequestHandler extends Thread {
   private final Socket connection;
 
   public RequestHandler(Socket connectionSocket) {
-    this.connection = connectionSocket;
+    this.connection = Objects.requireNonNull(connectionSocket, "Connection socket must not be null");
   }
 
   @Override
@@ -27,8 +27,26 @@ public class RequestHandler extends Thread {
       InputStream in = connection.getInputStream();
       OutputStream out = connection.getOutputStream()
     ) {
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+
+      // request line
+      String line = bufferedReader.readLine();
+      logger.debug("request line: {}", line);
+      if (line == null) {
+        return;
+      }
+
+      String[] tokens = line.split(" ");
+      String uri = tokens[1];
+
+      // request headers
+      while (!(line = bufferedReader.readLine()).isBlank()) {
+        logger.debug("header: {}", line);
+      }
+
+      // response
       DataOutputStream dos = new DataOutputStream(out);
-      byte[] body = "Hello, World!".getBytes();
+      byte[] body = Files.readAllBytes(new File("./src/main/webapp" + uri).toPath());
       response200Header(dos, body.length);
       responseBody(dos, body);
     } catch (IOException e) {
