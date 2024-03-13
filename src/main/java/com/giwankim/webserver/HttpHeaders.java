@@ -9,11 +9,13 @@ import java.util.Map;
 public class HttpHeaders {
   private static final Logger logger = LoggerFactory.getLogger(HttpHeaders.class);
 
+  private static final String KEY_VALUE_SEPARATOR = ":";
+
   private final Map<String, String> headers = new HashMap<>();
 
   public void add(String header) {
     logger.debug("Header: {}", header);
-    String[] parts = header.split(":");
+    String[] parts = header.split(KEY_VALUE_SEPARATOR);
     if (parts.length >= 2) {
       headers.put(parts[0].trim(), parts[1].trim());
     }

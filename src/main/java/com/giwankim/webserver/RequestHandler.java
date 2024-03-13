@@ -1,5 +1,6 @@
 package com.giwankim.webserver;
 
+import com.giwankim.db.Database;
 import com.giwankim.model.User;
 import com.giwankim.util.HttpRequestUtils;
 import com.giwankim.util.IOUtils;
@@ -11,10 +12,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -22,8 +20,9 @@ public class RequestHandler extends Thread {
   private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
 
   private static final String WEBAPP_PATH = "src/main/webapp";
-  private static final String INDEX_HTML = "/index.html";
   private static final String CRLF = "\r\n";
+  private static final String INDEX_HTML = "/index.html";
+  private static final String LOGIN_FAILED_HTML = "/user/login_failed.html";
 
   private final Socket connection;
 
@@ -48,9 +47,8 @@ public class RequestHandler extends Thread {
         return;
       }
       logger.debug("request line : {}", line);
-
-      List<String> tokens = Arrays.asList(line.split("\\s+", 3));
-      if (tokens.size() != 3) {
+      List<String> requestLineParts = Arrays.asList(line.split("\\s+", 3));
+      if (requestLineParts.size() < 3) {
         return;
       }
 
@@ -62,11 +60,10 @@ public class RequestHandler extends Thread {
         }
         httpHeaders.add(line);
       }
-
       int contentLength = httpHeaders.getContentLength();
 
       // response
-      String url = getUrlOrDefault(tokens);
+      String url = getUrlOrDefault(requestLineParts);
       if (url.startsWith("/user/create")) {
         String body = IOUtils.readData(bufferedReader, contentLength);
         Map<String, String> params = HttpRequestUtils.parseQueryString(body);
@@ -75,17 +72,38 @@ public class RequestHandler extends Thread {
           params.get("password"),
           params.get("name"),
           params.get("email"));
+        Database.addUser(user);
         logger.debug("User: {}", user);
-        response302Header(new DataOutputStream(out), INDEX_HTML);
-      } else {
         DataOutputStream dos = new DataOutputStream(out);
-        byte[] body = Files.readAllBytes(Paths.get(WEBAPP_PATH, url));
-        response200Header(dos, body.length);
-        responseBody(dos, body);
+        response302Header(dos, INDEX_HTML);
+      } else if (url.equals("/user/login")) {
+        String body = IOUtils.readData(bufferedReader, contentLength);
+        Map<String, String> params = HttpRequestUtils.parseQueryString(body);
+        Optional<User> optionalUser = Database.findUserById(params.get("userId"));
+        if (optionalUser.isPresent()) {
+          User user = optionalUser.get();
+          if (user.comparePasswords(params.get("password"))) {
+            DataOutputStream dos = new DataOutputStream(out);
+            response302LoginSuccessHeader(dos);
+          } else {
+            responseResource(out, url);
+          }
+        } else {
+          responseResource(out, LOGIN_FAILED_HTML);
+        }
+      } else {
+        responseResource(out, url);
       }
     } catch (IOException e) {
       logger.error(e.getMessage());
     }
+  }
+
+  private void responseResource(OutputStream out, String url) throws IOException {
+    DataOutputStream dos = new DataOutputStream(out);
+    byte[] body = Files.readAllBytes(Paths.get(WEBAPP_PATH, url));
+    response200Header(dos, body.length);
+    responseBody(dos, body);
   }
 
   private static String getUrlOrDefault(List<String> tokens) {
@@ -111,6 +129,17 @@ public class RequestHandler extends Thread {
     try {
       dos.writeBytes("HTTP/1.1 302 Found" + CRLF);
       dos.writeBytes("Location: " + location + CRLF);
+      dos.writeBytes(CRLF);
+    } catch (IOException e) {
+      logger.error(e.getMessage());
+    }
+  }
+
+  private void response302LoginSuccessHeader(DataOutputStream dos) {
+    try {
+      dos.writeBytes("HTTP/1.1 302 Found" + CRLF);
+      dos.writeBytes("Set-Cookie: login=true" + CRLF);
+      dos.writeBytes("Location: " + INDEX_HTML + CRLF);
       dos.writeBytes(CRLF);
     } catch (IOException e) {
       logger.error(e.getMessage());

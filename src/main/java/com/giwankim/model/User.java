@@ -29,6 +29,10 @@ public class User {
     return email;
   }
 
+  public boolean comparePasswords(String password) {
+    return this.password.equals(password);
+  }
+
   @Override
   public String toString() {
     return String.format("User{userId='%s', password='%s', name='%s', email='%s'}", userId, password, name, password);
