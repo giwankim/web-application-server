@@ -2,6 +2,7 @@ package com.giwankim.webserver;
 
 import com.giwankim.model.User;
 import com.giwankim.util.HttpRequestUtils;
+import com.giwankim.util.IOUtils;
 import com.giwankim.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,28 +53,27 @@ public class RequestHandler extends Thread {
       }
 
       // request headers
+      HttpHeaders httpHeaders = new HttpHeaders();
       while ((line = bufferedReader.readLine()) != null) {
         if (line.isBlank()) {
           break;
         }
-        logger.debug("header : {}", line);
+        httpHeaders.add(line);
       }
+
+      int contentLength = httpHeaders.getContentLength();
 
       // response
       String url = getUrlOrDefault(tokens);
       if (url.startsWith("/user/create")) {
-        // query string
-        String queryString = "";
-        if (url.contains("?")) {
-          queryString = url.substring(url.indexOf("?") + 1);
-        }
-        Map<String, String> queryParams = HttpRequestUtils.parseQueryString(queryString);
+        String body = IOUtils.readData(bufferedReader, contentLength);
+        Map<String, String> params = HttpRequestUtils.parseQueryString(body);
         // new user
         User user = new User(
-          queryParams.get("userId"),
-          queryParams.get("password"),
-          queryParams.get("name"),
-          queryParams.get("email"));
+          params.get("userId"),
+          params.get("password"),
+          params.get("name"),
+          params.get("email"));
         logger.debug("User: {}", user);
       } else {
         DataOutputStream dos = new DataOutputStream(out);
