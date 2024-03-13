@@ -2,6 +2,7 @@ package com.giwankim.webserver;
 
 import com.giwankim.model.User;
 import com.giwankim.util.HttpRequestUtils;
+import com.giwankim.util.IOUtils;
 import com.giwankim.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RequestHandler extends Thread {
   private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+
   private static final String WEBAPP_PATH = "src/main/webapp";
   private static final String INDEX_HTML = "/index.html";
+  private static final String CRLF = "\r\n";
 
   private final Socket connection;
 
@@ -52,29 +55,28 @@ public class RequestHandler extends Thread {
       }
 
       // request headers
+      HttpHeaders httpHeaders = new HttpHeaders();
       while ((line = bufferedReader.readLine()) != null) {
         if (line.isBlank()) {
           break;
         }
-        logger.debug("header : {}", line);
+        httpHeaders.add(line);
       }
+
+      int contentLength = httpHeaders.getContentLength();
 
       // response
       String url = getUrlOrDefault(tokens);
       if (url.startsWith("/user/create")) {
-        // query string
-        String queryString = "";
-        if (url.contains("?")) {
-          queryString = url.substring(url.indexOf("?") + 1);
-        }
-        Map<String, String> queryParams = HttpRequestUtils.parseQueryString(queryString);
-        // new user
+        String body = IOUtils.readData(bufferedReader, contentLength);
+        Map<String, String> params = HttpRequestUtils.parseQueryString(body);
         User user = new User(
-          queryParams.get("userId"),
-          queryParams.get("password"),
-          queryParams.get("name"),
-          queryParams.get("email"));
+          params.get("userId"),
+          params.get("password"),
+          params.get("name"),
+          params.get("email"));
         logger.debug("User: {}", user);
+        response302Header(new DataOutputStream(out), INDEX_HTML);
       } else {
         DataOutputStream dos = new DataOutputStream(out);
         byte[] body = Files.readAllBytes(Paths.get(WEBAPP_PATH, url));
@@ -96,10 +98,20 @@ public class RequestHandler extends Thread {
 
   private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
     try {
-      dos.writeBytes("HTTP/1.1 200 OK \r\n");
-      dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-      dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-      dos.writeBytes("\r\n");
+      dos.writeBytes("HTTP/1.1 200 OK" + CRLF);
+      dos.writeBytes("Content-Type: text/html;charset=utf-8" + CRLF);
+      dos.writeBytes("Content-Length: " + lengthOfBodyContent + CRLF);
+      dos.writeBytes(CRLF);
+    } catch (IOException e) {
+      logger.error(e.getMessage());
+    }
+  }
+
+  private void response302Header(DataOutputStream dos, String location) {
+    try {
+      dos.writeBytes("HTTP/1.1 302 Found" + CRLF);
+      dos.writeBytes("Location: " + location + CRLF);
+      dos.writeBytes(CRLF);
     } catch (IOException e) {
       logger.error(e.getMessage());
     }
@@ -108,6 +120,7 @@ public class RequestHandler extends Thread {
   private void responseBody(DataOutputStream dos, byte[] body) {
     try {
       dos.write(body, 0, body.length);
+      dos.writeBytes(CRLF);
       dos.flush();
     } catch (IOException e) {
       logger.error(e.getMessage());
