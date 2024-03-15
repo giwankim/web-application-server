@@ -1,20 +1,26 @@
 package com.giwankim.util;
 
+import com.giwankim.http.KvPair;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HttpRequestUtils {
 
   private static final String QUERYSTRING_SEPARATOR = "&";
+  private static final String COOKIE_SEPARATOR = ";";
 
   private HttpRequestUtils() {
   }
 
   public static Map<String, String> parseQueryString(String queryString) {
-    return Collections.unmodifiableMap(parseValues(queryString, QUERYSTRING_SEPARATOR));
+    return parseValues(queryString, QUERYSTRING_SEPARATOR);
+  }
+
+  public static Map<String, String> parseCookies(String cookies) {
+    return parseValues(cookies, COOKIE_SEPARATOR);
   }
 
   private static Map<String, String> parseValues(String values, String separator) {
@@ -26,48 +32,5 @@ public class HttpRequestUtils {
       .map(token -> KvPair.parse(token, "="))
       .filter(p -> !p.getKey().isEmpty())
       .collect(Collectors.toMap(KvPair::getKey, KvPair::getValue));
-  }
-
-  public static class KvPair {
-    private final String key;
-    private final String value;
-
-    public KvPair(String key, String value) {
-      this.key = key;
-      this.value = value;
-    }
-
-    public static KvPair parse(String input, String regex) {
-      String[] pairs = input.split(regex, 2);
-      if (pairs.length >= 2) {
-        return new KvPair(pairs[0].trim(), pairs[1].trim());
-      }
-      return new KvPair("", input);
-    }
-
-    public String getKey() {
-      return key;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-      if (this == object) return true;
-      if (!(object instanceof KvPair kvPair)) return false;
-      return Objects.equals(key, kvPair.key) && Objects.equals(value, kvPair.value);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(key, value);
-    }
-
-    @Override
-    public String toString() {
-      return String.format("KvPair{key='%s', value='%s'}", key, value);
-    }
   }
 }
