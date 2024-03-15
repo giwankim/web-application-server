@@ -70,7 +70,7 @@ public class RequestHandler extends Thread {
             DataOutputStream dos = new DataOutputStream(out);
             response302LoginSuccessHeader(dos);
           } else {
-            responseResource(out, path);
+            responseResource(out, LOGIN_FAILED_HTML);
           }
         } else {
           responseResource(out, LOGIN_FAILED_HTML);
@@ -95,6 +95,8 @@ public class RequestHandler extends Thread {
         DataOutputStream dos = new DataOutputStream(out);
         response200Header(dos, body.length);
         responseBody(dos, body);
+      } else if (path.endsWith(".css")) {
+        responseCssResource(out, path);
       } else {
         responseResource(out, path);
       }
@@ -126,11 +128,29 @@ public class RequestHandler extends Thread {
     responseBody(dos, body);
   }
 
-  private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+  private void responseCssResource(OutputStream out, String url) throws IOException {
+    DataOutputStream dos = new DataOutputStream(out);
+    byte[] body = Files.readAllBytes(Paths.get(WEBAPP_PATH, url));
+    response200CssHeader(dos, body.length);
+    responseBody(dos, body);
+  }
+
+  private void response200Header(DataOutputStream dos, int contentLength) {
     try {
       dos.writeBytes("HTTP/1.1 200 OK" + CRLF);
       dos.writeBytes("Content-Type: text/html; charset=utf-8" + CRLF);
-      dos.writeBytes("Content-Length: " + lengthOfBodyContent + CRLF);
+      dos.writeBytes("Content-Length: " + contentLength + CRLF);
+      dos.writeBytes(CRLF);
+    } catch (IOException e) {
+      logger.error(e.getMessage());
+    }
+  }
+
+  private void response200CssHeader(DataOutputStream dos, int contentLength) {
+    try {
+      dos.writeBytes("HTTP/1.1 200 OK" + CRLF);
+      dos.writeBytes("Content-Type: text/css; charset=utf-8" + CRLF);
+      dos.writeBytes("Content-Length: " + contentLength + CRLF);
       dos.writeBytes(CRLF);
     } catch (IOException e) {
       logger.error(e.getMessage());
