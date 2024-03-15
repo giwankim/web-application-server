@@ -35,6 +35,6 @@ public class User {
 
   @Override
   public String toString() {
-    return String.format("User{userId='%s', password='%s', name='%s', email='%s'}", userId, password, name, password);
+    return String.format("User{userId='%s', password='%s', name='%s', email='%s'}", userId, password, name, email);
   }
 }

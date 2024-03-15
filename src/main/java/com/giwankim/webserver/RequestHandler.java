@@ -1,6 +1,7 @@
 package com.giwankim.webserver;
 
 import com.giwankim.db.Database;
+import com.giwankim.http.HttpCookies;
 import com.giwankim.http.HttpRequest;
 import com.giwankim.http.HttpRequestParser;
 import com.giwankim.model.User;
@@ -14,6 +15,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,7 +28,11 @@ public class RequestHandler extends Thread {
 
   private static final String INDEX_HTML = "/index.html";
 
+  private static final String LOGIN_HTML = "/user/login.html";
+
   private static final String LOGIN_FAILED_HTML = "/user/login_failed.html";
+
+  private static final String LOGIN_COOKIE_KEY = "login";
 
   private final Socket connection;
 
@@ -52,7 +58,7 @@ public class RequestHandler extends Thread {
           request.getParameter("name"),
           request.getParameter("email"));
         Database.addUser(user);
-        logger.debug("User: {}", user);
+        logger.debug("User : {}", user);
         DataOutputStream dos = new DataOutputStream(out);
         response302Header(dos, INDEX_HTML);
       } else if ("/user/login".equals(path)) {
@@ -69,12 +75,41 @@ public class RequestHandler extends Thread {
         } else {
           responseResource(out, LOGIN_FAILED_HTML);
         }
+      } else if ("/user/list".equals(path)) {
+        if (!isLoggedIn(request)) {
+          responseResource(out, LOGIN_HTML);
+          return;
+        }
+        Collection<User> users = Database.findAll();
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table border='1'>");
+        for (User user : users) {
+          sb.append("<tr>");
+          sb.append("<td>").append(user.getUserId()).append("</td>");
+          sb.append("<td>").append(user.getName()).append("</td>");
+          sb.append("<td>").append(user.getEmail()).append("</td>");
+          sb.append("</tr>");
+        }
+        sb.append("</table>");
+        byte[] body = sb.toString().getBytes();
+        DataOutputStream dos = new DataOutputStream(out);
+        response200Header(dos, body.length);
+        responseBody(dos, body);
       } else {
         responseResource(out, path);
       }
     } catch (IOException e) {
       logger.error(e.getMessage());
     }
+  }
+
+  private static boolean isLoggedIn(HttpRequest request) {
+    HttpCookies cookies = request.getCookies();
+    String value = cookies.getCookie(LOGIN_COOKIE_KEY);
+    if (value == null) {
+      return false;
+    }
+    return Boolean.parseBoolean(value);
   }
 
   private static String getPathOrDefault(String url) {
@@ -94,7 +129,7 @@ public class RequestHandler extends Thread {
   private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
     try {
       dos.writeBytes("HTTP/1.1 200 OK" + CRLF);
-      dos.writeBytes("Content-Type: text/html;charset=utf-8" + CRLF);
+      dos.writeBytes("Content-Type: text/html; charset=utf-8" + CRLF);
       dos.writeBytes("Content-Length: " + lengthOfBodyContent + CRLF);
       dos.writeBytes(CRLF);
     } catch (IOException e) {
@@ -115,7 +150,7 @@ public class RequestHandler extends Thread {
   private void response302LoginSuccessHeader(DataOutputStream dos) {
     try {
       dos.writeBytes("HTTP/1.1 302 Found" + CRLF);
-      dos.writeBytes("Set-Cookie: login=true" + CRLF);
+      dos.writeBytes(String.format("Set-Cookie: %s=true%s", LOGIN_COOKIE_KEY, CRLF));
       dos.writeBytes("Location: " + INDEX_HTML + CRLF);
       dos.writeBytes(CRLF);
     } catch (IOException e) {
