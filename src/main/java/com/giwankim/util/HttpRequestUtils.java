@@ -28,11 +28,9 @@ public class HttpRequestUtils {
       return Collections.emptyMap();
     }
     String[] pairs = values.split(separator);
-    return Collections.unmodifiableMap(
-      Arrays.stream(pairs)
-        .map(token -> KvPair.parse(token, "="))
-        .filter(p -> !p.getKey().isEmpty())
-        .collect(Collectors.toMap(KvPair::getKey, KvPair::getValue))
-    );
+    return Arrays.stream(pairs)
+      .map(token -> KvPair.parse(token, "="))
+      .filter(p -> !p.getKey().isEmpty())
+      .collect(Collectors.toMap(KvPair::getKey, KvPair::getValue));
   }
 }

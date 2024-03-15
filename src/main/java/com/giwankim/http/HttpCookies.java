@@ -5,7 +5,7 @@ import com.giwankim.util.HttpRequestUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-class HttpCookies {
+public class HttpCookies {
   private final Map<String, String> cookies;
 
   private HttpCookies() {
@@ -20,11 +20,11 @@ class HttpCookies {
     return new HttpCookies(HttpRequestUtils.parseCookies(values));
   }
 
-  Map<String, String> getCookies() {
+  public Map<String, String> getCookies() {
     return cookies;
   }
 
-  String getCookie(String name) {
+  public String getCookie(String name) {
     return cookies.get(name);
   }
 }
