@@ -14,7 +14,7 @@ public class HttpRequest {
   }
 
   static HttpRequest of(RequestLine requestLine, HttpHeaders headers, String body) {
-    return new HttpRequest(requestLine, headers, new DefaultRequestParameters(requestLine.getQueryString(), body));
+    return new HttpRequest(requestLine, headers, RequestParameters.of(requestLine.getQueryString(), body));
   }
 
   public HttpMethod getMethod() {
@@ -35,5 +35,14 @@ public class HttpRequest {
 
   public HttpCookies getCookies() {
     return headers.getCookies();
+  }
+
+  @Override
+  public String toString() {
+    return "HttpRequest{" +
+      "requestLine=" + requestLine +
+      ", headers=" + headers +
+      ", requestParameters=" + requestParameters +
+      '}';
   }
 }

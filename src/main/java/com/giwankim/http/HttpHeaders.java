@@ -41,4 +41,11 @@ class HttpHeaders {
   HttpCookies getCookies() {
     return HttpCookies.from(getHeader(COOKIE));
   }
+
+  @Override
+  public String toString() {
+    return "HttpHeaders{" +
+      "headers=" + headers +
+      '}';
+  }
 }

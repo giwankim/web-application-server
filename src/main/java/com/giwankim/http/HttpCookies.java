@@ -2,6 +2,7 @@ package com.giwankim.http;
 
 import com.giwankim.util.HttpRequestUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,10 +22,17 @@ public class HttpCookies {
   }
 
   public Map<String, String> getCookies() {
-    return cookies;
+    return Collections.unmodifiableMap(cookies);
   }
 
   public String getCookie(String name) {
     return cookies.get(name);
+  }
+
+  @Override
+  public String toString() {
+    return "HttpCookies{" +
+      "cookies=" + cookies +
+      '}';
   }
 }
