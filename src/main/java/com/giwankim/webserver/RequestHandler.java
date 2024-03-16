@@ -8,11 +8,9 @@ import com.giwankim.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -34,21 +32,22 @@ public class RequestHandler extends Thread {
 
   private static final String LOGIN_COOKIE_KEY = "login";
 
-  private final Socket connection;
+  private final Socket client;
 
-  public RequestHandler(Socket connectionSocket) {
-    this.connection = Objects.requireNonNull(connectionSocket, "Connection socket must not be null");
+  public RequestHandler(Socket client) {
+    this.client = Objects.requireNonNull(client, "Connection socket must not be null");
   }
 
   @Override
   public void run() {
-    logger.debug("New Client Connection! Connected to IP: {}, Port: {}", connection.getInetAddress(), connection.getPort());
+    logger.debug("New Client Connection! Connected to IP: {}, Port: {}", client.getInetAddress(), client.getPort());
 
     try (
-      connection;
-      InputStream in = connection.getInputStream();
-      OutputStream out = connection.getOutputStream()) {
-      HttpRequest request = HttpRequestParser.parse(in);
+      client;
+      BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
+      OutputStream out = client.getOutputStream()) {
+
+      HttpRequest request = HttpRequestParser.parse(reader);
       String path = getPathOrDefault(request.getPath());
 
       if ("/user/create".equals(path)) {
