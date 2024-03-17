@@ -11,10 +11,10 @@ import java.util.Collection;
 import static com.giwankim.webserver.Constants.COOKIE_LOGIN;
 import static com.giwankim.webserver.Constants.LOGIN;
 
-public class ListUserController implements Controller {
+public class ListUserController extends AbstractController {
 
   @Override
-  public void service(HttpRequest request, HttpResponse response) {
+  protected void doGet(HttpRequest request, HttpResponse response) {
     if (!isLoggedIn(request.getCookies())) {
       response.sendRedirect(LOGIN);
       return;

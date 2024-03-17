@@ -9,10 +9,10 @@ import java.util.Optional;
 
 import static com.giwankim.webserver.Constants.*;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
   @Override
-  public void service(HttpRequest request, HttpResponse response) {
+  protected void doPost(HttpRequest request, HttpResponse response) {
     Optional<User> maybeUser = Database.findUserById(request.getParameter("userId"));
     if (maybeUser.isPresent()) {
       User user = maybeUser.get();

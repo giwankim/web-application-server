@@ -2,5 +2,9 @@ package com.giwankim.http;
 
 public enum HttpMethod {
   GET,
-  POST
+  POST;
+
+  public boolean isPost() {
+    return this == POST;
+  }
 }
