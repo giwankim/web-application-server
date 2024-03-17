@@ -1,6 +1,6 @@
 package com.giwankim.http;
 
-public enum HttpStatus {
+enum HttpStatus {
   OK(200, "OK"),
   CREATED(201, "CREATED"),
   NO_CONTENT(204, "No Content"),
