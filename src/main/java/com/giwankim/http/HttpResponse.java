@@ -16,9 +16,9 @@ public class HttpResponse {
 
   private static final String WEBAPP_PATH = "src/main/webapp";
 
-  private static final String CONTENT_TYPE = "Content-Type";
+  private static final String HEADER_CONTENT_TYPE = "Content-Type";
 
-  private static final String CONTENT_LENGTH = "Content-Length";
+  private static final String HEADER_CONTENT_LENGTH = "Content-Length";
 
   private static final String CRLF = "\r\n";
 
@@ -50,14 +50,14 @@ public class HttpResponse {
   public void forward(String url) {
     try {
       if (url.endsWith(".css")) {
-        headers.put(CONTENT_TYPE, "text/css");
+        headers.put(HEADER_CONTENT_TYPE, ContentType.TEXT_CSS.getType());
       } else if (url.endsWith(".js")) {
-        headers.put(CONTENT_TYPE, "application/javascript");
+        headers.put(HEADER_CONTENT_TYPE, ContentType.APPLICATION_JAVASCRIPT.getType());
       } else {
-        headers.put(CONTENT_TYPE, "text/html; charset=utf-8");
+        headers.put(HEADER_CONTENT_TYPE, ContentType.TEXT_HTML.getType());
       }
       byte[] body = Files.readAllBytes(Paths.get(WEBAPP_PATH, url));
-      headers.put(CONTENT_LENGTH, String.valueOf(body.length));
+      headers.put(HEADER_CONTENT_LENGTH, String.valueOf(body.length));
       sendBody(body);
     } catch (IOException e) {
       logger.error(e.getMessage());
@@ -66,8 +66,8 @@ public class HttpResponse {
 
   public void forwardBody(String body) {
     byte[] contents = body.getBytes();
-    headers.put(CONTENT_TYPE, "text/html; charset=utf-8");
-    headers.put(CONTENT_LENGTH, String.valueOf(contents.length));
+    headers.put(HEADER_CONTENT_TYPE, ContentType.TEXT_HTML.getType());
+    headers.put(HEADER_CONTENT_LENGTH, String.valueOf(contents.length));
     sendBody(contents);
   }
 
