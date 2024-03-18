@@ -5,22 +5,17 @@ import com.giwankim.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpRequestParser {
 
   private HttpRequestParser() {
   }
 
-  public static HttpRequest parse(InputStream in) {
+  public static HttpRequest parse(BufferedReader reader) {
     try {
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, UTF_8));
-      RequestLine requestLine = parseRequestLine(bufferedReader);
-      HttpHeaders headers = parseHeaders(bufferedReader);
-      String body = IOUtils.readData(bufferedReader, headers.getContentLength());
+      RequestLine requestLine = parseRequestLine(reader);
+      HttpHeaders headers = parseHeaders(reader);
+      String body = IOUtils.readData(reader, headers.getContentLength());
       return HttpRequest.of(requestLine, headers, body);
     } catch (IOException e) {
       throw new HttpRequestParseException("Failed to parse", e);

@@ -2,7 +2,10 @@ package com.giwankim.http;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,9 +13,7 @@ class HttpRequestParserTest {
 
   @Test
   void parseGetWithQueryString() {
-    InputStream in = getFileFromResources("Http_GET.txt");
-
-    HttpRequest request = HttpRequestParser.parse(in);
+    HttpRequest request = parseFromFile("Http_GET.txt");
 
     assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
     assertThat(request.getPath()).isEqualTo("/user/create");
@@ -22,9 +23,7 @@ class HttpRequestParserTest {
 
   @Test
   void parsePostWithBody() {
-    InputStream in = getFileFromResources("Http_POST.txt");
-
-    HttpRequest request = HttpRequestParser.parse(in);
+    HttpRequest request = parseFromFile("Http_POST.txt");
 
     assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
     assertThat(request.getPath()).isEqualTo("/user/create");
@@ -34,9 +33,7 @@ class HttpRequestParserTest {
 
   @Test
   void parsePostWithBodyAndQueryString() {
-    InputStream in = getFileFromResources("Http_POST2.txt");
-
-    HttpRequest request = HttpRequestParser.parse(in);
+    HttpRequest request = parseFromFile("Http_POST2.txt");
 
     assertThat(request.getMethod()).isEqualTo(HttpMethod.POST);
     assertThat(request.getPath()).isEqualTo("/user/create");
@@ -45,7 +42,12 @@ class HttpRequestParserTest {
     assertThat(request.getParameter("name")).isEqualTo("JaeSung");
   }
 
-  InputStream getFileFromResources(String filename) {
-    return getClass().getClassLoader().getResourceAsStream(filename);
+  private HttpRequest parseFromFile(String filename) {
+    InputStream in = getClass().getClassLoader().getResourceAsStream(filename);
+    if (in == null) {
+      throw new IllegalArgumentException("file not found: " + filename);
+    }
+    BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+    return HttpRequestParser.parse(reader);
   }
 }
