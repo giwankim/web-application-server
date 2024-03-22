@@ -5,9 +5,9 @@ import com.giwankim.util.HttpRequestUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 class RequestParameters {
-
   private final Map<String, String> parameters;
 
   private RequestParameters() {
@@ -15,7 +15,7 @@ class RequestParameters {
   }
 
   private RequestParameters(Map<String, String> parameters) {
-    this.parameters = parameters;
+    this.parameters = Objects.requireNonNull(parameters);
   }
 
   static RequestParameters of(String queryString, String body) {

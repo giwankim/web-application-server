@@ -4,6 +4,7 @@ import com.giwankim.controller.Controller;
 import com.giwankim.http.HttpRequest;
 import com.giwankim.http.HttpRequestParser;
 import com.giwankim.http.HttpResponse;
+import com.giwankim.http.HttpSessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.giwankim.webserver.Constants.INDEX;
 
@@ -38,6 +40,10 @@ public class RequestHandler extends Thread {
 
       HttpRequest request = HttpRequestParser.parse(reader);
       HttpResponse response = HttpResponse.from(writer);
+
+      if (!request.getCookies().containsCookie(HttpSessions.SESSION_ID_NAME)) {
+        response.setCookie(HttpSessions.SESSION_ID_NAME, String.valueOf(UUID.randomUUID()));
+      }
 
       Controller controller = RequestMapping.getController(request.getPath());
       if (controller == null) {

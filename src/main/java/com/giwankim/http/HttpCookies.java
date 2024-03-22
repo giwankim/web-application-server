@@ -3,21 +3,17 @@ package com.giwankim.http;
 import com.giwankim.util.HttpRequestUtils;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpCookies {
   private final Map<String, String> cookies;
 
-  private HttpCookies() {
-    this(new HashMap<>());
+  HttpCookies(Map<String, String> cookies) {
+    this.cookies = Objects.requireNonNull(cookies);
   }
 
-  private HttpCookies(Map<String, String> cookies) {
-    this.cookies = cookies;
-  }
-
-  static HttpCookies from(String values) {
+  public static HttpCookies from(String values) {
     return new HttpCookies(HttpRequestUtils.parseCookies(values));
   }
 
@@ -27,6 +23,10 @@ public class HttpCookies {
 
   public String getCookie(String name) {
     return cookies.get(name);
+  }
+
+  public boolean containsCookie(String name) {
+    return cookies.containsKey(name);
   }
 
   @Override
