@@ -51,12 +51,17 @@ class HttpHeaders {
     return 0;
   }
 
+  public boolean containsHeader(String name) {
+    return headers.containsKey(name);
+  }
+
   public HttpCookies getCookies() {
     return HttpCookies.from(getHeader(HEADER_COOKIE));
   }
 
-  public boolean containsHeader(String name) {
-    return headers.containsKey(name);
+  public HttpSession getSession() {
+    String sessionId = getCookies().getCookie(HttpSessions.SESSION_ID_NAME);
+    return HttpSessions.getOrCreateSession(sessionId);
   }
 
   @Override

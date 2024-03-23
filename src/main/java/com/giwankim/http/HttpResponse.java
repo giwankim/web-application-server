@@ -51,7 +51,7 @@ public class HttpResponse {
   }
 
   public void setCookie(String name, String value) {
-    setHeader(HEADER_SET_COOKIE, name + "=" + value);
+    setHeader(HEADER_SET_COOKIE, name + "=" + value + "; Path=/");
   }
 
   public void forward(String url) {
@@ -98,11 +98,7 @@ public class HttpResponse {
 
   private void processStatusLine(HttpStatus httpStatus) {
     try {
-      String statusLine = String.format(
-        "HTTP/1.1 %d %s%s",
-        httpStatus.getStatusCode(),
-        httpStatus.getReason(),
-        CRLF);
+      String statusLine = String.format("HTTP/1.1 %d %s%s", httpStatus.getStatusCode(), httpStatus.getReason(), CRLF);
       writer.writeBytes(statusLine);
     } catch (IOException e) {
       logger.error(e.getMessage());

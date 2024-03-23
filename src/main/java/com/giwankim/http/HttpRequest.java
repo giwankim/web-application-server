@@ -39,6 +39,10 @@ public class HttpRequest {
     return headers.getCookies();
   }
 
+  public HttpSession getSession() {
+    return headers.getSession();
+  }
+
   @Override
   public String toString() {
     return "HttpRequest{" +
