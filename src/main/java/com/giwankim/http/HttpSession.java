@@ -34,4 +34,8 @@ public class HttpSession {
   public void removeAttribute(String name) {
     attributes.remove(name);
   }
+
+  void invalidate() {
+    HttpSessions.remove(id);
+  }
 }

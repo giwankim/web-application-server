@@ -14,19 +14,18 @@ public class LoginController extends AbstractController {
 
   @Override
   protected void doPost(HttpRequest request, HttpResponse response) {
-    Optional<User> maybeUser = Database.findUserById(request.getParameter("userId"));
-    if (maybeUser.isPresent()) {
-      User user = maybeUser.get();
+    Optional<User> optionalUser = Database.findUserById(request.getParameter("userId"));
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
       if (user.comparePasswords(request.getParameter("password"))) {
-        response.setHeader("Set-Cookie", COOKIE_LOGIN + "=true; Path=/");
         HttpSession session = request.getSession();
-        session.setAttribute("user", user);
-        response.sendRedirect(INDEX);
+        session.setAttribute(SESSION_USER_KEY, user);
+        response.sendRedirect(INDEX_PAGE);
       } else {
-        response.sendRedirect(LOGIN_FAILED);
+        response.sendRedirect(LOGIN_FAILED_PAGE);
       }
     } else {
-      response.sendRedirect(LOGIN_FAILED);
+      response.sendRedirect(LOGIN_FAILED_PAGE);
     }
   }
 }

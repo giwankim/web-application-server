@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.giwankim.webserver.Constants.INDEX;
+import static com.giwankim.webserver.Constants.INDEX_PAGE;
 
 public class RequestHandler extends Thread {
   private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
@@ -58,7 +58,7 @@ public class RequestHandler extends Thread {
 
   private static String getPathOrDefault(String url) {
     if ("/".equals(url)) {
-      return INDEX;
+      return INDEX_PAGE;
     }
     return url;
   }
