@@ -12,7 +12,7 @@ public class HttpSessions {
   private HttpSessions() {
   }
 
-  public static HttpSession getOrCreateSession(String id) {
+  static HttpSession getOrCreateSession(String id) {
     if (sessions.containsKey(id)) {
       return sessions.get(id);
     }

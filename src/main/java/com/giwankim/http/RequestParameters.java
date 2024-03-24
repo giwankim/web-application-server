@@ -20,8 +20,8 @@ class RequestParameters {
 
   static RequestParameters of(String queryString, String body) {
     RequestParameters params = new RequestParameters();
-    params.addParameters(queryString);
-    params.addParameters(body);
+    params.parseAddParameters(queryString);
+    params.parseAddParameters(body);
     return params;
   }
 
@@ -33,7 +33,7 @@ class RequestParameters {
     return parameters.get(name);
   }
 
-  private void addParameters(String params) {
+  private void parseAddParameters(String params) {
     parameters.putAll(HttpRequestUtils.parseQueryString(params));
   }
 }

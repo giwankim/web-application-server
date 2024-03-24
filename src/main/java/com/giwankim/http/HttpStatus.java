@@ -20,11 +20,11 @@ enum HttpStatus {
     this.reason = reason;
   }
 
-  public int getStatusCode() {
+  int getStatusCode() {
     return statusCode;
   }
 
-  public String getReason() {
+  String getReason() {
     return reason;
   }
 }

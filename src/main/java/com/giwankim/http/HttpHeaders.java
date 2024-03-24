@@ -18,15 +18,15 @@ class HttpHeaders {
 
   private final Map<String, String> headers;
 
-  public HttpHeaders() {
+  HttpHeaders() {
     this(new HashMap<>());
   }
 
-  public HttpHeaders(Map<String, String> headers) {
+  HttpHeaders(Map<String, String> headers) {
     this.headers = Objects.requireNonNull(headers);
   }
 
-  public void add(String header) {
+  void add(String header) {
     logger.debug("header : {}", header);
     String[] parts = header.split(KV_SEPARATOR, 2);
     if (parts.length != 2) {
@@ -35,15 +35,15 @@ class HttpHeaders {
     headers.put(parts[0].trim(), parts[1].trim());
   }
 
-  public String getHeader(String name) {
+  String getHeader(String name) {
     return headers.get(name);
   }
 
-  public int getContentLength() {
+  int getContentLength() {
     return getIntHeader(HEADER_CONTENT_LENGTH);
   }
 
-  public int getIntHeader(String name) {
+  int getIntHeader(String name) {
     String contentLength = getHeader(name);
     if (contentLength != null) {
       return Integer.parseInt(contentLength);
@@ -51,15 +51,15 @@ class HttpHeaders {
     return 0;
   }
 
-  public boolean containsHeader(String name) {
+  boolean containsHeader(String name) {
     return headers.containsKey(name);
   }
 
-  public HttpCookies getCookies() {
+  HttpCookies getCookies() {
     return HttpCookies.from(getHeader(HEADER_COOKIE));
   }
 
-  public HttpSession getSession() {
+  HttpSession getSession() {
     String sessionId = getCookies().getCookie(HttpSessions.SESSION_ID_NAME);
     return HttpSessions.getOrCreateSession(sessionId);
   }
