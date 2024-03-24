@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpResponse {
   private static final Logger logger = LoggerFactory.getLogger(HttpResponse.class);
@@ -20,6 +21,8 @@ public class HttpResponse {
 
   private static final String HEADER_CONTENT_LENGTH = "Content-Length";
 
+  private static final String HEADER_SET_COOKIE = "Set-Cookie";
+
   private static final String CRLF = "\r\n";
 
   private final DataOutputStream writer;
@@ -27,7 +30,7 @@ public class HttpResponse {
   private final Map<String, String> headers;
 
   public HttpResponse(DataOutputStream writer) {
-    this.writer = writer;
+    this.writer = Objects.requireNonNull(writer);
     this.headers = new HashMap<>();
   }
 
@@ -45,6 +48,10 @@ public class HttpResponse {
 
   public void setHeader(String name, String value) {
     headers.put(name, value);
+  }
+
+  public void setCookie(String name, String value) {
+    setHeader(HEADER_SET_COOKIE, name + "=" + value + "; Path=/");
   }
 
   public void forward(String url) {
@@ -91,11 +98,7 @@ public class HttpResponse {
 
   private void processStatusLine(HttpStatus httpStatus) {
     try {
-      String statusLine = String.format(
-        "HTTP/1.1 %d %s%s",
-        httpStatus.getStatusCode(),
-        httpStatus.getReason(),
-        CRLF);
+      String statusLine = String.format("HTTP/1.1 %d %s%s", httpStatus.getStatusCode(), httpStatus.getReason(), CRLF);
       writer.writeBytes(statusLine);
     } catch (IOException e) {
       logger.error(e.getMessage());

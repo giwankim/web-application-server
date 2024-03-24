@@ -3,6 +3,7 @@ package com.giwankim.controller;
 import com.giwankim.db.Database;
 import com.giwankim.http.HttpRequest;
 import com.giwankim.http.HttpResponse;
+import com.giwankim.http.HttpSession;
 import com.giwankim.model.User;
 
 import java.util.Optional;
@@ -13,17 +14,18 @@ public class LoginController extends AbstractController {
 
   @Override
   protected void doPost(HttpRequest request, HttpResponse response) {
-    Optional<User> maybeUser = Database.findUserById(request.getParameter("userId"));
-    if (maybeUser.isPresent()) {
-      User user = maybeUser.get();
+    Optional<User> optionalUser = Database.findUserById(request.getParameter("userId"));
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
       if (user.comparePasswords(request.getParameter("password"))) {
-        response.setHeader("Set-Cookie", COOKIE_LOGIN + "=true; Path=/");
-        response.sendRedirect(INDEX);
+        HttpSession session = request.getSession();
+        session.setAttribute(SESSION_USER_KEY, user);
+        response.sendRedirect(INDEX_PAGE);
       } else {
-        response.sendRedirect(LOGIN_FAILED);
+        response.sendRedirect(LOGIN_FAILED_PAGE);
       }
     } else {
-      response.sendRedirect(LOGIN_FAILED);
+      response.sendRedirect(LOGIN_FAILED_PAGE);
     }
   }
 }

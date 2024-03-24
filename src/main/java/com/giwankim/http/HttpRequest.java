@@ -1,5 +1,7 @@
 package com.giwankim.http;
 
+import java.util.Objects;
+
 public class HttpRequest {
   private final RequestLine requestLine;
 
@@ -8,9 +10,9 @@ public class HttpRequest {
   private final RequestParameters requestParameters;
 
   private HttpRequest(RequestLine requestLine, HttpHeaders headers, RequestParameters parameters) {
-    this.requestLine = requestLine;
-    this.headers = headers;
-    this.requestParameters = parameters;
+    this.requestLine = Objects.requireNonNull(requestLine);
+    this.headers = Objects.requireNonNull(headers);
+    this.requestParameters = Objects.requireNonNull(parameters);
   }
 
   static HttpRequest of(RequestLine requestLine, HttpHeaders headers, String body) {
@@ -35,6 +37,10 @@ public class HttpRequest {
 
   public HttpCookies getCookies() {
     return headers.getCookies();
+  }
+
+  public HttpSession getSession() {
+    return headers.getSession();
   }
 
   @Override
