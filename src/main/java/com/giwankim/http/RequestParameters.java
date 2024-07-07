@@ -5,9 +5,9 @@ import com.giwankim.util.HttpRequestUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 class RequestParameters {
-
   private final Map<String, String> parameters;
 
   private RequestParameters() {
@@ -15,13 +15,13 @@ class RequestParameters {
   }
 
   private RequestParameters(Map<String, String> parameters) {
-    this.parameters = parameters;
+    this.parameters = Objects.requireNonNull(parameters);
   }
 
   static RequestParameters of(String queryString, String body) {
     RequestParameters params = new RequestParameters();
-    params.addParameters(queryString);
-    params.addParameters(body);
+    params.parseAddParameters(queryString);
+    params.parseAddParameters(body);
     return params;
   }
 
@@ -33,7 +33,7 @@ class RequestParameters {
     return parameters.get(name);
   }
 
-  private void addParameters(String params) {
+  private void parseAddParameters(String params) {
     parameters.putAll(HttpRequestUtils.parseQueryString(params));
   }
 }

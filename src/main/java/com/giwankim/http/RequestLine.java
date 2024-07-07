@@ -3,6 +3,8 @@ package com.giwankim.http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 class RequestLine {
   private static final Logger logger = LoggerFactory.getLogger(RequestLine.class);
 
@@ -13,9 +15,9 @@ class RequestLine {
   private final String queryString;
 
   private RequestLine(HttpMethod method, String path, String queryString) {
-    this.method = method;
-    this.path = path;
-    this.queryString = queryString;
+    this.method = Objects.requireNonNull(method);
+    this.path = Objects.requireNonNull(path);
+    this.queryString = Objects.requireNonNull(queryString);
   }
 
   public static RequestLine from(String requestLine) {

@@ -7,7 +7,7 @@ import com.giwankim.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.giwankim.webserver.Constants.INDEX;
+import static com.giwankim.webserver.Constants.INDEX_PAGE;
 
 public class CreateUserController extends AbstractController {
   private static final Logger logger = LoggerFactory.getLogger(CreateUserController.class);
@@ -21,6 +21,6 @@ public class CreateUserController extends AbstractController {
       request.getParameter("email"));
     Database.addUser(user);
     logger.debug("User : {}", user);
-    response.sendRedirect(INDEX);
+    response.sendRedirect(INDEX_PAGE);
   }
 }

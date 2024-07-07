@@ -1,6 +1,6 @@
 package com.giwankim.http;
 
-public enum ContentType {
+enum ContentType {
   APPLICATION_JAVASCRIPT("application/javascript"),
   TEXT_HTML("text/html"),
   TEXT_CSS("text/css");
@@ -11,7 +11,7 @@ public enum ContentType {
     this.type = type;
   }
 
-  public String getType() {
+  String getType() {
     return type;
   }
 

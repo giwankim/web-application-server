@@ -5,17 +5,26 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 class HttpHeaders {
   private static final Logger logger = LoggerFactory.getLogger(HttpHeaders.class);
 
   private static final String KV_SEPARATOR = ":";
 
-  private static final String CONTENT_LENGTH = "Content-Length";
+  private static final String HEADER_CONTENT_LENGTH = "Content-Length";
 
-  private static final String COOKIE = "Cookie";
+  private static final String HEADER_COOKIE = "Cookie";
 
-  private final Map<String, String> headers = new HashMap<>();
+  private final Map<String, String> headers;
+
+  HttpHeaders() {
+    this(new HashMap<>());
+  }
+
+  HttpHeaders(Map<String, String> headers) {
+    this.headers = Objects.requireNonNull(headers);
+  }
 
   void add(String header) {
     logger.debug("header : {}", header);
@@ -31,15 +40,28 @@ class HttpHeaders {
   }
 
   int getContentLength() {
-    String contentLength = getHeader(CONTENT_LENGTH);
+    return getIntHeader(HEADER_CONTENT_LENGTH);
+  }
+
+  int getIntHeader(String name) {
+    String contentLength = getHeader(name);
     if (contentLength != null) {
       return Integer.parseInt(contentLength);
     }
     return 0;
   }
 
+  boolean containsHeader(String name) {
+    return headers.containsKey(name);
+  }
+
   HttpCookies getCookies() {
-    return HttpCookies.from(getHeader(COOKIE));
+    return HttpCookies.from(getHeader(HEADER_COOKIE));
+  }
+
+  HttpSession getSession() {
+    String sessionId = getCookies().getCookie(HttpSessions.SESSION_ID_NAME);
+    return HttpSessions.getOrCreateSession(sessionId);
   }
 
   @Override
